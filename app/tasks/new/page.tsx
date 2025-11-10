@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase-client";
@@ -12,7 +12,7 @@ interface TaskInputs {
     description: string
 }
 
-const newTask = () => {
+const NewTask = () => {
     const router = useRouter()
     const user = useAuth()
     const { register, handleSubmit, formState: { errors } } = useForm<TaskInputs>()
@@ -28,7 +28,7 @@ const newTask = () => {
             alert("please log in first")
             return
         }
-        let table_data = { user_id: user.id, task_name: task_name, description: description, completed: false }
+        const table_data = { user_id: user.id, task_name: task_name, description: description, completed: false }
         const { error } = await supabase.from("tasks").insert(table_data)
         if (error) {
             alert(`insert unsuccessful, please try again, ${error}`)
@@ -63,4 +63,4 @@ const newTask = () => {
     )
 }
 
-export default newTask
+export default NewTask

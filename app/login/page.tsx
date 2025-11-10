@@ -9,7 +9,7 @@ interface FormInputs {
     password: string
 }
 
-const login = () => {
+const Login = () => {
     const [isSignIn, setIsSignIn] = useState<boolean>(false);
     const [error, setError] = useState<string>("")
     const { register, handleSubmit, formState: { errors } } = useForm<FormInputs>()
@@ -62,4 +62,4 @@ const login = () => {
     )
 }
 
-export default login
+export default Login

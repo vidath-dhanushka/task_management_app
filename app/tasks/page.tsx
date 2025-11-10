@@ -1,7 +1,6 @@
 "use client";
 
-import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -14,22 +13,26 @@ interface Task {
     completed: boolean
 }
 
-export default function tasks() {
+export default function Tasks() {
     const { user } = useAuth()
     const [taskList, setTaskList] = useState<Task[]>([])
     const router = useRouter()
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         const { data, error } = await supabase.from("tasks").select("*");
         if (error) {
             alert("can't retrieve data")
             return
         }
         setTaskList(data)
-    }
+    }, [])
+
     useEffect(() => {
-        fetchData()
-    }, [user])
+        const loadTasks = async () => fetchData()
+        if (user) {
+            loadTasks()
+        }
+    }, [user, fetchData])
 
     useEffect(() => {
         if (!user) router.push("/login");
