@@ -4,8 +4,11 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-client";
 import { User } from "@supabase/supabase-js";
 
+interface AuthContextType {
+    user: User | null;
+}
 
-const AuthContext = createContext(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
@@ -22,11 +25,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return () => authListener.subscription.unsubscribe();
     }, []);
 
+    const value: AuthContextType = { user };
+
     return (
-        <AuthContext.Provider value={{ user }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = (): AuthContextType => {
+    const context = useContext(AuthContext);
+
+    if (context === null) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+
+    return context;
+};
