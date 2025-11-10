@@ -9,8 +9,9 @@ import { supabase } from '@/lib/supabase-client';
 
 
 interface Task {
-    task_id: number,
-    description: string
+    task_id: string,
+    description: string,
+    completed: boolean
 }
 
 export default function tasks() {
@@ -20,7 +21,11 @@ export default function tasks() {
 
     const fetchData = async () => {
         const { data, error } = await supabase.from("tasks").select("*");
-        console.log(data)
+        if (error) {
+            alert("can't retrieve data")
+            return
+        }
+        setTaskList(data)
     }
     useEffect(() => {
         fetchData()
@@ -31,8 +36,18 @@ export default function tasks() {
     }, [user, router]);
 
 
-    const deleteTask = (task_id: number) => {
+    const deleteTask = async (task_id: string) => {
+        await supabase.from("tasks").delete().eq("task_id", task_id)
+        fetchData()
+    }
 
+    const toggleCompleted = async (task_id: string, currentValue: boolean) => {
+        const { error } = await supabase.from("tasks").update({ completed: !currentValue }).eq("task_id", task_id)
+        if (error) {
+            alert("failed to update the status")
+            return
+        }
+        fetchData()
     }
     return (
         <div>
@@ -41,7 +56,7 @@ export default function tasks() {
             </div>
             <div className='flex flex-row justify-center items-center'>
                 <div>
-                    <h1 className='text-center mb-4'>Hello Tasks</h1>
+                    <h1 className='text-center mb-4'>Your Current Tasks</h1>
                     <table>
                         <tbody>
                             {taskList.map((task, index) => {
@@ -49,6 +64,7 @@ export default function tasks() {
                                     <tr key={task.task_id}>
                                         <td>{index + 1}</td>
                                         <td className='px-6'>{task.description}</td>
+                                        <td className='px-4'><input type="checkbox" checked={task.completed} onChange={() => (toggleCompleted(task.task_id, task.completed))} /></td>
                                         <td><button className='hover:cursor-pointer' onClick={() => { deleteTask(task.task_id) }}>Delete</button></td>
                                     </tr>
                                 )

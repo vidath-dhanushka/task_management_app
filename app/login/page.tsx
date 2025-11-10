@@ -40,6 +40,7 @@ const login = () => {
     return (
         <div className="flex justify-center items-center h-screen">
             <div className="bg-slate-700 rounded-md p-8 text-center">
+                <h1>{isSignIn ? "Login" : "Sign Up"}</h1>
                 <form onSubmit={handleSubmit(formSubmit)}>
                     <div className="flex justify-between w-full mb-6">
                         <label htmlFor="email">Email</label>
