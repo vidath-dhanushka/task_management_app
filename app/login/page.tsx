@@ -10,7 +10,7 @@ interface FormInputs {
 }
 
 const Login = () => {
-    const [isSignIn, setIsSignIn] = useState<boolean>(false);
+    const [isSignIn, setIsSignIn] = useState<boolean>(true);
     const [error, setError] = useState<string>("")
     const { register, handleSubmit, formState: { errors } } = useForm<FormInputs>()
     const router = useRouter()

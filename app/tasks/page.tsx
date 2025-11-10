@@ -14,7 +14,7 @@ interface Task {
 }
 
 export default function Tasks() {
-    const { user } = useAuth()
+    const { user, loading } = useAuth()
     const [taskList, setTaskList] = useState<Task[]>([])
     const router = useRouter()
 
@@ -35,8 +35,10 @@ export default function Tasks() {
     }, [user, fetchData])
 
     useEffect(() => {
-        if (!user) router.push("/login");
-    }, [user, router]);
+        if (!loading && !user) {
+            router.push("/login");
+        }
+    }, [user, loading, router]);
 
 
     const deleteTask = async (task_id: string) => {
@@ -52,10 +54,16 @@ export default function Tasks() {
         }
         fetchData()
     }
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut()
+        router.push("/login")
+    }
     return (
         <div>
             <div className='flex justify-end'>
-                <button className='px-4 py-2 border rounded-md m-2'><Link href="/tasks/new">New Task</Link></button>
+                <button className='px-4 py-2 border rounded-md m-2 hover:cursor-pointer'><Link href="/tasks/new">New Task</Link></button>
+                <button className='px-4 py-2 border rounded-md m-2 hover:cursor-pointer' onClick={handleLogout}>Sign Out</button>
             </div>
             <div className='flex flex-row justify-center items-center'>
                 <div>

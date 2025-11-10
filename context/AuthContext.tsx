@@ -6,40 +6,46 @@ import { User } from "@supabase/supabase-js";
 
 interface AuthContextType {
     user: User | null;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        supabase.auth.getUser().then(({ data }) => {
-            setUser(data?.user ?? null);
+        // Load session at start
+        supabase.auth.getSession().then(({ data }) => {
+            setUser(data.session?.user ?? null);
+            setLoading(false);
         });
 
-        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-        });
+        // Listen to login/logout changes
+        const { data: listener } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                setUser(session?.user ?? null);
+                setLoading(false);
+            }
+        );
 
-        return () => authListener.subscription.unsubscribe();
+        return () => {
+            listener.subscription.unsubscribe();
+        };
     }, []);
 
-    const value: AuthContextType = { user };
-
     return (
-        <AuthContext.Provider value={value}>
+        <AuthContext.Provider value={{ user, loading }}>
             {children}
         </AuthContext.Provider>
     );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
     const context = useContext(AuthContext);
-
-    if (context === null) {
-        throw new Error('useAuth must be used within an AuthProvider');
+    if (!context) {
+        throw new Error("useAuth must be used within AuthProvider");
     }
-
     return context;
 };
